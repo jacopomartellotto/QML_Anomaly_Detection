@@ -1,3 +1,26 @@
-/dataset
-/env
-_pycache_
+# Ignora la cartella 'dataset'
+dataset/
+# Ignora la cartella dell'ambiente virtuale
+env/
+# File temporanei di Jupyter Notebook
+.ipynb_checkpoints/
+# File di sistema
+.DS_Store
+Thumbs.db
+# File di swap/editor temporanei
+*.swp
+*.swo
+*~
+# Output Python (es. file compilati)
+__pycache__/
+*.py[cod]
+
+# File di log
+*.log
+# File di configurazione dell'IDE
+.idea/
+# File di configurazione di Visual Studio Code
+.vscode/
+# File di configurazione di PyCharm
+*.iml
+
