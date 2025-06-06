@@ -23,4 +23,6 @@ __pycache__/
 .vscode/
 # File di configurazione di PyCharm
 *.iml
+report.pdf
+*.synctex.gz
 
