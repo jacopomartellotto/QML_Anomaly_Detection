@@ -25,4 +25,5 @@ __pycache__/
 *.iml
 report.pdf
 *.synctex.gz
-
+*.aux
+*.out
