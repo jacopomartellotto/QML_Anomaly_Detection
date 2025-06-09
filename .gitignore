@@ -24,6 +24,12 @@ __pycache__/
 # File di configurazione di PyCharm
 *.iml
 report.pdf
+presentation.pdf
 *.synctex.gz
 *.aux
 *.out
+*.nav
+*.snm
+*.toc
+main.pdf
+beamer/unipi-eps-converted-to.pdf

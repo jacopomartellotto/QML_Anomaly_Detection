@@ -1,0 +1,76 @@
+\mode<presentation>
+
+\beamertemplatenavigationsymbolsempty
+
+\def\true{1}
+\def\false{2}
+
+\newcommand{\indexoverview}{\begin{frame}    
+\tableofcontents[sectionstyle=show,
+subsectionstyle=show/shaded,
+subsubsectionstyle=show/shaded/hide]
+\end{frame}}
+
+\useoutertheme[footline=authorinstitutetitle,subsection=false]{smoothbars}
+\useinnertheme{circles}
+
+\makeatletter
+
+\setbeamertemplate{footline}
+  {   
+  \if\bottomtitlebar\true
+    \begin{beamercolorbox}[ht=2ex,dp=2ex,
+      leftskip=.2cm,rightskip=.2cm]{author in head/foot}
+      \usebeamercolor[bg]{foot}
+      {\usebeamerfont{author in head/foot}\insertsection ~- \insertsubsection}
+      \hfill
+      {\usebeamerfont{institute in head/foot}\insertinstitute}
+    \end{beamercolorbox}
+    \fi
+
+    \if\bottomsectionbar\true
+    \begin{beamercolorbox}[ht=2ex,dp=2ex,
+      leftskip=.2cm,rightskip=.3cm]{author in head/foot}
+      \usebeamercolor[bg]{foot}
+      {\usebeamerfont{title in head/foot}\inserttitle}
+      \hfill
+      {\usebeamerfont{frame number}\insertframenumber /\inserttotalframenumber}
+    \end{beamercolorbox}
+    \fi
+}
+
+\xdefinecolor{unipismalllight}{RGB}{42,106,157}
+\xdefinecolor{light}{RGB}{22,95,150}
+\xdefinecolor{dark}{RGB}{15,74,124}
+\xdefinecolor{lighten}{RGB}{55,116,164}
+
+\setbeamercolor{title}{bg = \colortheme, fg = white}
+\setbeamercolor{foot}{bg = \colortheme}
+\setbeamercolor{structure}{fg = \colortheme, bg = \colortheme}
+\setbeamercolor{mini frame}{fg = \colortheme, bg = unipismalllight}
+\setbeamercolor{normal text}{fg = black}
+\setbeamercolor{alerted text}{fg = \colortheme, bg = white}
+
+\setbeamercolor{block body alerted}{bg = alerted text.bg, fg = alerted text.fg}
+\setbeamercolor{block title alerted}{fg = alerted text}
+\setbeamercolor{block body}{bg = white, fg = black}
+\setbeamercolor{block title}{fg = \colortheme, bg = white}
+
+\newcommand{\sectionoverview}{\begin{frame}
+\tableofcontents[sectionstyle=show/shaded,subsectionstyle=show/shaded/hide,subsubsectionstyle=show/shaded/hide]
+\end{frame}}
+
+\newcommand{\subsectionoverview}{\begin{frame}
+\tableofcontents[sectionstyle=show/shaded,subsectionstyle=show/shaded/hide,subsubsectionstyle=show/shaded/hide]
+\end{frame}}
+
+\newcommand{\firstpage}{\begin{frame}
+    \titlepage
+    \begin{figure}[htbp]
+        \centering
+        \includegraphics[keepaspectratio, scale = 0.25]{beamer/unipi.eps}
+    \end{figure}
+\end{frame}}
+
+\mode
+<all>
