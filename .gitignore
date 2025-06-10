@@ -1,5 +1,3 @@
-# Ignora la cartella 'dataset'
-dataset/
 # Ignora la cartella dell'ambiente virtuale
 env/
 # File temporanei di Jupyter Notebook
