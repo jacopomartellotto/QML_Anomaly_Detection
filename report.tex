@@ -1,5 +1,5 @@
 \documentclass[10pt,twocolumn]{article}
-
+\usepackage{comment}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{amsmath,amsfonts,amssymb}
@@ -15,13 +15,17 @@
 \usepackage{authblk}
 \geometry{margin=0.75in}
 
-\title{\textbf{Quantum Machine Learning con Pennylane: \\
-Studio Sperimentale e Analisi dei Risultati}}
+\title{\textbf{Anomaly Detection with QML: A Benchmark study using different approaches with Pennylane}}
 
-\author[1]{Tuo Nome}
-\affil[1]{\small Dipartimento di Informatica Quantistica, Università di Esempio\\
-\texttt{tuo.email@esempio.com}}
+\author[1]{Jacopo Martellotto}
+\affil[1]{\small Dipartimento di Fisica, Università di Pisa\\
+\texttt{j.martellotto@studenti.unipi.it}}
 \date{}
+
+\author[2]{Federico Morano}
+\affil[1]{\small Dipartimento di Fisica, Università di Pisa\\
+\texttt{f.morano1@studenti.unipi.it}}
+\date{} 
 
 \pagestyle{fancy}
 \fancyhf{}
@@ -98,12 +102,15 @@ Utilizziamo l’ottimizzatore \texttt{AdamOptimizer} con learning rate 0.1 per 1
 \section{Risultati}
 Il modello ha raggiunto un’accuratezza del \textbf{94\%} sul problema XOR, superando la soglia random e avvicinandosi alle prestazioni di una rete neurale classica MLP.
 
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=\linewidth]{path/to/accuracy_plot.png}
-    \caption{Evoluzione dell’accuratezza nel tempo}
-    \label{fig:acc}
-\end{figure}
+\begin{comment}
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=\linewidth]{path/to/accuracy_plot.png}
+        \caption{Evoluzione dell’accuratezza nel tempo}
+        \label{fig:acc}
+    \end{figure}
+\end{comment}
+
 
 \section{Discussione}
 Nonostante le limitazioni di scala, il VQC ha dimostrato:
