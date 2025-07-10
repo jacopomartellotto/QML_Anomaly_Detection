@@ -36,7 +36,11 @@
 \maketitle
 
 \section{Introduction}
-
+The exponential growth of digital transactions and the increasing sophistication of cyber threats have made fraud detection a critical and challenging task. Traditional machine learning methods have shown promising results in identifying anomalies within large-scale datasets; however, their limitations in scalability, privacy, and computational cost highlight the need for exploring more advanced paradigms.\\
+This project investigates the use of QML techniques to enhance fraud detection systems, with a particular focus on identifying the most accurate and efficient approaches. Our research compares and evaluates several architectures and strategies, including Quantum Neural Networks (QNNs), Quantum Federated Learning (QFL), and a selection of classical machine learning algorithms commonly used for anomaly detection.\\
+In all QML-based experiments, we employ hybrid models that combine classical and quantum layers, leveraging the representational power of quantum circuits while retaining the stability and scalability of classical neural networks.\\
+For the federated learning scenario, our architecture emphasizes data privacy and security. Instead of sharing raw data, each client trains its model locally and only transmits encrypted model parameters to the aggregator. To enforce privacy and trust in this decentralized setting, we integrate blockchain technology for verifiable model sharing and quantum cryptography techniques such as simulated Quantum Key Distribution (QKD) and homomorphic encryption. This ensures secure and tamper-resistant communication between clients and the central server without compromising sensitive data.\\
+By systematically comparing these approaches across a benchmarked fraud detection task, the goal of this project is to determine which paradigm—classical, quantum, or hybrid—offers the best trade-off between accuracy, privacy, and computational efficiency in anomaly detection.
 
 \section{About Dataset}
 
@@ -46,20 +50,12 @@
 
 
 \section{Classic Machine Learning}
-\subsection{Dummy}
-\subsection{Decision Tree}
-\subsection{AdaBoost}
-\subsection{KNN}
-\subsection{MLP}
-\subsection{Logistic Regression}
-\subsection{Random Forest}
-\subsection{SVM}
-
+\subsubsection{Results}
 
 
 \section{Quantum Machine Learning}
 \subsection{QNN}
-
+\subsubsection{Results}
 
 \subsection{QFNN}
 \begin{figure}[h!]
