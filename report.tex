@@ -43,19 +43,46 @@ For the federated learning scenario, our architecture emphasizes data privacy an
 By systematically comparing these approaches across a benchmarked fraud detection task, the goal of this project is to determine which paradigm—classical, quantum, or hybrid—offers the best trade-off between accuracy, privacy, and computational efficiency in anomaly detection.
 
 \section{About Dataset}
-
+For our experiments, we utilize the Credit Card Fraud Detection dataset, which is publicly available on Kaggle. It contains 20k+ transactions and it's highly imbalanced. The dataset is made up of 114 columuns. Obviously, the last one \texttt{targets} is the target column, which indicates whether a transaction is fraudulent (1) or not (0). The dataset has been preprocessed to remove any personally identifiable information, ensuring that it can be used for research purposes without compromising privacy.\\
+Before Preprocessing, let's analyze the dataset. In order to evaluate how features are correlated each other, we can use the correlation matrix. The correlation matrix is a table that shows the correlation coefficients between many variables. Each cell in the table displays the correlation between two variables. The values range from -1 to 1. The heatmap of the correlation matrix can help us visualize these relationships more clearly. In the figure below, we present the correlation heatmap of the most relevant 30 features. 
+\begin{figure}[h!]
+	\centering
+	\includegraphics[height = 0.6\textheight]{img/correlation_heatmap_top_30_features.png}
+	\caption{Correlation heatmap of the top 30 features in the Credit Card Fraud Detection dataset. Darker colors indicate stronger correlations between features, while lighter colors indicate weaker correlations. This visualization helps identify potential relationships and interactions between variables that may be relevant for fraud detection.}
+\end{figure}
 
 
 \section{Preprocessing}
-
+An essential step in the development of a predictive model is data preprocessing, which includes all the necessary operations to make the dataset suitable for analysis. In our case, the dataset is significantly imbalanced: fraudulent transactions represent only a small fraction compared to legitimate ones. This class imbalance can severely affect the performance of classification models, leading them to favor the majority class and, as a result, reducing their ability to correctly detect fraud, which is the primary focus of the analysis.\\
+To address this issue, we explored two common approaches: undersampling of the majority class and oversampling of the minority class.
+\begin{itemize}
+    \item \textit{Undersampling} reduces the number of samples in the majority class (i.e., legitimate transactions) by randomly selecting a subset. While this method can quickly balance the dataset, it risks discarding valuable information, potentially decreasing the model’s generalization capabilities.
+    \item \textit{Oversampling} increases the number of minority class samples. In particular, we adopted the SMOTE (Synthetic Minority Oversampling Technique) method, which generates synthetic samples instead of duplicating existing ones. This helps to enrich the distribution of the minority class in feature space.
+\end{itemize}
+\subsubsection*{SMOTE: Synthetic Minority Oversampling Technique}
+SMOTE works by creating new synthetic examples of the minority class in feature space. Given a sample \( \mathbf{x}_i \) from the minority class, the algorithm selects its \( k \)-nearest neighbors (typically \( k = 5 \)). One of these neighbors, \( \mathbf{x}_{zi} \), is chosen at random. A new synthetic sample \( \mathbf{x}_{\text{new}} \) is then generated as a convex combination of \( \mathbf{x}_i \) and \( \mathbf{x}_{zi} \), using the formula:
+\[
+\mathbf{x}_{\text{new}} = \mathbf{x}_i + \lambda \cdot (\mathbf{x}_{zi} - \mathbf{x}_i)
+\]
+where \( \lambda \in [0, 1] \) is a random number. This process effectively expands the decision region of the minority class, producing samples that lie along the lines connecting existing samples and their neighbors, thus helping the classifier learn more generalized boundaries.
+\subsubsection*{Comparison and Method Selection}
+We tested both approaches in a separate workspace (not included in the main project directory) by training a standard Random Forest classifier on each preprocessed dataset. The performance of the models was then evaluated using standard classification metrics, including accuracy, precision, recall, and F1-score.
+The results indicated that the dataset generated using SMOTE significantly outperformed the one obtained through undersampling, especially in terms of recall for the minority class. This improvement demonstrates SMOTE’s effectiveness in addressing class imbalance without sacrificing overall model performance. Consequently, SMOTE was selected as the official resampling strategy for the data preprocessing pipeline.
+\begin{figure}[h!]
+	\centering
+	\includegraphics[height = 0.30\textheight]{img/SMOTE.png}
+	\caption{Implementation of the SMOTE algorithm in Python.}
+\end{figure}
 
 \section{Classic Machine Learning}
-\subsubsection{Results}
+
 
 
 \section{Quantum Machine Learning}
 \subsection{QNN}
-\subsubsection{Results}
+
+
+
 
 \subsection{QFNN}
 \begin{figure}[h!]
@@ -70,7 +97,7 @@ In our proposed framework, the client nodes consist of quantum computers or quan
 	\includegraphics[height = 0.30\textheight]{img/QFL.png}
 	\caption{Federated Quantum Learning (QFL)}
 \end{figure}
-The primary objective of this approach is to develop an advanced fraud detection system across multiple financial institutions using an innovative approach that integrates \textit{Quantum Federated Learning} (QFL) with adaptive federated learning techniques. The proposed solution emphasizes both privacy preservation and improved model performance by combining the computational power of quantum-enhanced models with the collaborative nature of federated learning.\\
+The proposed solution emphasizes both privacy preservation and improved model performance by combining the computational power of quantum-enhanced models with the collaborative nature of federated learning.\\
 This solution enables decentralized model training while ensuring that sensitive financial data remains private and secure. The system incorporates several advanced components, including quantum machine learning, homomorphic encryption, blockchain for model integrity, and a dynamic client-weighting mechanism for adaptive learning.
 Let's analyze the architecture and key features of this project in detail:
 \begin{itemize}
@@ -116,15 +143,21 @@ The following variables define the core configuration of the federated learning 
 
 
 \subsubsection*{- Secure Model Handling: Shamir's Secret Sharing, Homomorphic Encryption, and Hashing}
-\begin{figure}[H]
+\begin{figure}[h!]
 	\centering
 	\includegraphics[height = 0.47\textheight]{img/QFL_code/1.png}
 \end{figure}
-The code segment implements three critical components for securing the parameters and communication of a federated learning system: Shamir’s Secret Sharing, CKKS homomorphic encryption, and a quantum-resistant hash function.\\
-The function \texttt{shamir\_split(secret, n, k, prime)} is used to split a sensitive value, such as a model weight or a cryptographic key, into $n$ distinct shares using \textbf{Shamir’s Secret Sharing} scheme. It first generates a random polynomial of degree $k-1$ with the secret as the constant term, and evaluates it at $n$ different $x$-coordinates. Each share corresponds to a unique point $(x, y)$ on this polynomial. The shares can be safely distributed to different clients or nodes. Only when at least $k$ shares are combined can the original secret be reconstructed, ensuring threshold-based access control.\\
-The \texttt{encrypt\_weights(weights, context)} function is responsible for encrypting the weights of a machine learning model using the \textbf{CKKS} (Cheon-Kim-Kim-Song) encryption scheme. CKKS supports approximate arithmetic on encrypted floating-point numbers, making it ideal for secure computation in machine learning workflows. Each weight tensor is first flattened and converted to a list, then encrypted using the TenSEAL library’s \texttt{ts.ckks\_vector} method, with the encryption context providing the necessary keys and parameters.\\
-Finally, the \texttt{qhash(data)} function generates a \textbf{quantum-resistant cryptographic hash} of the given input string using the SHA-256 algorithm. This function encodes the input to bytes and returns a hexadecimal representation of the 256-bit hash. Although not immune to quantum attacks in the strictest sense, SHA-256 is currently considered sufficiently resistant for practical post-quantum security applications.
+\noindent The code segment implements three critical components for securing the parameters and communication of a federated learning system: Shamir’s Secret Sharing, CKKS homomorphic encryption, and a quantum-resistant hash function.\\
+The function \texttt{shamir\_split(secret, n, k, prime)} is used to split model weight into $n$ distinct shares using \textbf{Shamir’s Secret Sharing} scheme. It first generates a random polynomial of degree $k-1$ with the secret as the constant term, and evaluates it at $n$ different $x$-coordinates. Each share corresponds to a unique point $(x, y)$ on this polynomial. The shares can be safely distributed to different clients or nodes. Only when at least $k$ shares are combined can the original secret be reconstructed, ensuring threshold-based access control.\\
+\begin{figure}[h!]
+	\centering
+	\includegraphics[height = 0.30\textheight]{img/QFL_code/SSS.png}
+	\caption{Shamir's Secret Sharing Example}
+\end{figure}
 
+\noindent The \texttt{encrypt\_weights(weights, context)} function is responsible for encrypting the weights of a machine learning model using the \textbf{CKKS} (Cheon-Kim-Kim-Song) homomorphic encryption scheme. CKKS enables approximate arithmetic over encrypted real or complex numbers by encoding floating-point vectors into the coefficients of a polynomial over a cyclotomic ring. Specifically, CKKS works over a ring of the form \( \mathbb{Z}_q[X]/(X^N + 1) \), where \( N \) is a power of two and \( q \) is a large modulus. The plaintext values are first scaled by a factor \( \Delta \gg 1 \) to preserve precision, then embedded into the complex plane via a canonical embedding before encryption.\\
+Each weight tensor is first flattened and converted into a list of floating-point numbers, then encrypted using the TenSEAL library's \texttt{ts.ckks\_vector} method. This method handles encoding, scaling, and encryption, using the encryption \texttt{context} to access the appropriate public keys and encryption parameters (such as polynomial degree, scale, and coefficient modulus chain). CKKS supports operations like addition and multiplication directly on encrypted data, making it particularly suitable for privacy-preserving inference in machine learning.\\
+The \texttt{qhash(data)} function, on the other hand, generates a \textbf{cryptographic hash} of the input string using the SHA-256 algorithm, which produces a 256-bit digest represented in hexadecimal form. The input is first encoded into bytes before being passed to the hashing function. While SHA-256 is not strictly quantum-resistant—since Grover’s algorithm could reduce its effective security level from 256 to roughly 128 bits—it is still considered \emph{quantum-resilient} in practice for many applications. This means that even in the presence of a quantum adversary, brute-force attacks remain computationally infeasible with current and near-future quantum hardware.
 
 
 \subsubsection*{- Secure Aggregation and Hashing in Federated Quantum Neural Networks}
@@ -133,25 +166,57 @@ Finally, the \texttt{qhash(data)} function generates a \textbf{quantum-resistant
 	\includegraphics[height = 0.6\textheight]{img/QFL_code/2.png}
 \end{figure}
 \paragraph{Adaptive Weight Generation}
-\texttt{generate\_adaptive\_factors(num\_clients, lower, upper)} generates a list of random floating-point values, one per client, uniformly sampled from a defined range. These values act as \textit{adaptive scaling factors} used to weight each client's contribution during aggregation. Such factors can reflect data quality, sample size, or trustworthiness of each client, and are later normalized when applied to model updates.
+\texttt{generate\_adaptive\_factors(num\_clients, lower, upper)} generates a list of random floating-point values, one per client, uniformly sampled from a defined range. These values act as \textit{adaptive scaling factors} used to weight each client's contribution during aggregation. Such factors can reflect data quality, sample size, or trustworthiness of each client, and are later normalized when applied to model updates. In this case, the function results to be not so accurate, since generates random adaptive values. In a real-world scenario, these factors should be determined based on the clients' performance metrics, such as accuracy or loss on a validation set, or other criteria that reflect the quality of their local models.
 \paragraph{Homomorphic Weighted Averaging}
 \texttt{weighted\_average\_ckks\_nested(encrypted\_weights, factors)} performs homomorphic aggregation of encrypted model parameters. It assumes that each client's model weights are encrypted using the CKKS scheme and structured as a list of layers. For each layer, it computes a weighted sum across all clients, where each client's weights are scaled by their corresponding adaptive factor. Since the operations are performed directly on encrypted data, the aggregation process ensures strong privacy guarantees. Additionally, the code includes a diagnostic step that decrypts each aggregated layer to log its dimensionality.
 \paragraph{Robust Median Aggregation}
-\texttt{median\_aggregator\_qnn\_parameters(encrypted\_params, factors)} implements a robust alternative to averaging by computing a weighted median for each parameter across clients. After decrypting each client’s encrypted parameters, the function processes each position (i.e., parameter index) independently: it sorts the values and their associated normalized weights, computes cumulative weights, and selects the parameter value corresponding to the smallest index whose cumulative weight exceeds $0.5$.
+The \texttt{median\_aggregator\_qnn\_parameters(encrypted\_params, factors)} function implements a robust aggregation mechanism for federated or distributed learning by computing the \textbf{weighted median} of model parameters instead of the standard weighted mean. This approach increases resistance to outliers or malicious clients by ensuring that the final aggregated parameter values reflect the majority trend rather than being influenced by extreme values.\\
+The input \texttt{encrypted\_params} is a list of lists, where each inner list contains the encrypted parameters of a model layer from an individual client. The \texttt{factors} list contains adaptive weighting factors (e.g., based on data quality or trustworthiness) associated with each client.\\
+The function proceeds as follows:
+\begin{enumerate}
+  \item Compute the total sum of all weighting factors, and normalize them to obtain a probability distribution over clients.
+  \item Iterate over each layer index. For each layer:
+  \begin{enumerate}
+    \item Collect the encrypted parameters from all clients for that specific layer.
+    \item Decrypt all parameters to obtain plaintext vectors.
+    \item For each parameter index (i.e., position within the parameter vector):
+    \begin{enumerate}
+      \item Extract all client values at that position.
+      \item Sort the values in ascending order, along with their associated normalized weights.
+      \item Compute the cumulative sum of the sorted weights.
+      \item Identify the smallest index \( i \) such that the cumulative weight exceeds 0.5. This corresponds to the \textbf{weighted median} of the parameter.
+      \item Assign the median value to the corresponding position in the aggregated parameter vector.
+    \end{enumerate}
+  \end{enumerate}
+  \item Append the aggregated (median) parameter vector for each layer to the result.
+\end{enumerate}
+
 \paragraph{Quantum-Resistant Hashing}
 \texttt{qhash(data)} computes a cryptographically secure hash of an input string using the SHA-256 algorithm.
 
 
-\subsection*{- Model Serialization, AES Encryption, and Simulated QKD}
+\subsubsection*{- Model Serialization, AES Encryption, and Simulated QKD}
 \begin{figure}[H]
 	\centering
-	\includegraphics[height = 0.6\textheight]{img/QFL_code/3.png}
+	\includegraphics[height = 0.52\textheight]{img/QFL_code/3.png}
 \end{figure}
 This section introduces a secure pipeline for serializing and encrypting the parameters of a neural network model, along with a simulated key distribution mechanism inspired by Quantum Key Distribution (QKD).
-\paragraph{Model Serialization}
-\texttt{serialize\_model\_weights(model)} is designed to extract and serialize all trainable parameters (weights and biases) from a Keras-based deep learning model. For each layer in the model, the function checks whether the layer contains trainable parameters via the \texttt{get\_weights()} method. If present, weights and biases are flattened into one-dimensional arrays and added to a list (\texttt{serialized\_weights}). Each floating-point number is then converted into a 4-byte binary representation using the \texttt{struct.pack("!f", w)} instruction, which enforces big-endian byte order. This binary format is compact and compatible with block-based encryption algorithms, such as AES.
 \paragraph{AES-Based Encryption}
-\texttt{encrypt\_with\_aes(plaintext\_weights, key)} takes the serialized weights (output from the previous function) and encrypts them using AES. The encryption is performed in Electronic Code Book (ECB) mode. Before encryption, the plaintext data is padded using the PKCS7 scheme to align it with AES’s block size (16 bytes). The data is then divided into 16-byte blocks and encrypted individually using the AES cipher. The result is a list of encrypted blocks, each representing a segment of the serialized model parameters.
+The \texttt{encrypt\_with\_aes(plaintext\_weights, key)} function encrypts the serialized model weights using the AES (Advanced Encryption Standard) block cipher in \textbf{Electronic Code Book (ECB)} mode. Before encryption, the input data is padded using the \textbf{PKCS\#7} padding scheme to ensure that its length is a multiple of AES’s block size (16 bytes).
+\paragraph{PKCS\#7 Padding.} Let \( B = 16 \) be the AES block size in bytes, and let the length of the plaintext (in bytes) be \( L \). If \( L \mod B = r \), the plaintext is padded by appending \( B - r \) bytes, each of which has value \( B - r \). Formally, if \( P \in \{0,1\}^{L} \) is the plaintext, then the padded message is:
+\[
+P' = P \, \| \, \underbrace{(B - r)\|(B - r)\|\dots\|(B - r)}_{B - r \text{ times}} \in \{0,1\}^{L + (B - r)}.
+\]
+If the length is already a multiple of \( B \), an entire block of padding of value \( B \) is added.
+\paragraph{ECB Mode.} In Electronic Code Book mode, the padded plaintext is divided into \( n \) blocks \( P'_1, P'_2, \ldots, P'_n \), each of length \( B \), and each block is encrypted independently using the AES cipher \( E_k \) with key \( k \):
+\[
+C_i = E_k(P'_i) \quad \text{for } i = 1, \dots, n.
+\]
+The resulting ciphertext is the concatenation of the encrypted blocks:
+\[
+C = C_1 \| C_2 \| \dots \| C_n.
+\]
+While ECB mode is deterministic and allows parallel encryption of blocks, it is generally \emph{not semantically secure} because identical plaintext blocks yield identical ciphertext blocks. It is suitable only when input data does not exhibit structural redundancy (e.g., fixed-format weights), or when semantic security is not a strict requirement.
 \paragraph{Simulated QKD for Key Assignment}
 \texttt{simulate\_qkd\_resources(num\_nodes)} simulates a Quantum Key Distribution (QKD) system by generating a unique AES key for each client or node in a distributed learning network. The function approximates the output of a QKD protocol by using \texttt{os.urandom} to generate secure, random 128-bit keys. The function returns a dictionary mapping each node identifier to its respective symmetric key.
 
@@ -200,7 +265,7 @@ In the next step, we will implement the local training process for each client.
 
 \paragraph{Secure Weight Extraction and Encryption.}
 After local training, the weights of each client's model are extracted specifically from the dense layers. These weights are first split using Shamir’s Secret Sharing scheme, which converts each real-valued weight into a set of $n$ modular shares using a polynomial of degree $k - 1$. This ensures that the weight can only be reconstructed if at least $k$ out of $n$ shares are collected. The integer conversion via multiplication by $10^6$ maintains precision while ensuring compatibility with modular arithmetic over a prime field.
-Subsequently, the original weight matrices are also encrypted using the CKKS (Cheon–Kim–Kim–Song) homomorphic encryption scheme. This encryption allows computation directly on ciphertexts, meaning that model aggregation and analysis can be performed securely without decryption. The CKKS context is initialized with high-precision parameters suitable for approximate floating-point computation.
+Subsequently, the original weight matrices are also encrypted using the CKKS (Cheon–Kim–Kim–Song) homomorphic encryption scheme. This encryption allows computation directly on ciphertexts, meaning that model aggregation and analysis can be performed securely without decryption.
 \begin{figure}[H]
 	\centering
 	\includegraphics[height = 0.2\textheight]{img/QFL_code/7.png}
@@ -226,23 +291,67 @@ The global model is serialized into 32-bit floats and encrypted block-wise using
 \paragraph{Evaluation of Aggregated and Local Models.}
 After each training and aggregation round, the global model is evaluated on a test set consisting of all clients’ data. This provides a comprehensive metric of generalization across the entire system. Simultaneously, the performance of an individual client (typically Client 1) is also assessed on its own local test set to monitor personalized model performance.
 The results from each iteration are stored for both global and local accuracy, enabling longitudinal analysis of the model's evolution, convergence behavior, and fairness across clients.
-\subsection{Results}
+
+\subsection{Ganache Blockchain}
+Ganache is a local Ethereum blockchain emulator used primarily for testing and development of smart contracts. It allows developers to deploy and interact with contracts in a controlled environment without requiring access to the main Ethereum network. In our project, Ganache is used to simulate the blockchain environment in which the \texttt{NewSecureAggregation.sol} smart contract is deployed and tested. The Python script \texttt{deploy\_contract.py} establishes a connection to the Ganache RPC server, loads the compiled contract's ABI and bytecode, and performs the deployment using Web3.py. This setup facilitates rapid development and debugging of Ethereum-based applications.
 \begin{figure}[H]
 	\centering
-	\includegraphics[height = 0.4\textheight]{img/global_model_accuracy.png}
-    \caption{Global model accuracy on combined test set = 98.83\%}
+	\includegraphics[height = 0.20\textheight]{img/QFL_code/Ganache.png}
 \end{figure}
+\subsubsection*{Smart Contract}
+The \texttt{NewSecureAggregation.sol} file contains a Solidity smart contract designed to perform secure data aggregation on the Ethereum blockchain. The contract implements logic for receiving, managing, and aggregating encrypted data or model updates from multiple participants, which is particularly relevant in federated learning or privacy-preserving computation scenarios. It defines key structures such as mappings to store individual contributions and control logic to ensure that only authorized or valid data submissions are accepted. The contract may also include aggregation functions, state management, and event logging to provide transparency and auditability of operations. Its design ensures decentralization, integrity, and traceability of the aggregation process in a trustless environment.
+
+\subsection{Results}
 \begin{figure}[H]
     \centering
-    \includegraphics[height = 0.4\textheight]{img/local_model_accuracy.png}
-    \caption{Client 1 model accuracy on its own test set = 98.53\%}
+    \begin{minipage}{0.49\textwidth}
+        \centering
+        \includegraphics[height=0.23\textheight]{img/global_model_accuracy.png}
+        \caption{Global model accuracy on combined test set is 97.04\%}
+        \label{fig:global_accuracy}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.49\textwidth}
+        \centering
+        \includegraphics[height=0.23\textheight]{img/local_model_accuracy.png}
+        \caption{Client 1 model accuracy on its own test set is 95.84\%}
+        \label{fig:local_accuracy}
+    \end{minipage}
 \end{figure}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Client} & \textbf{Accuracy (\%)} \\
+\hline
+Client 1 & 95.84 \\
+Client 2 & 97.80 \\
+Client 3 & 97.07 \\
+Client 4 & 96.82 \\
+Client 5 & 98.04 \\
+Client 6 & 97.07 \\
+Client 7 & 96.82 \\
+Client 8 & 96.58 \\
+Client 9 & 96.82 \\
+Client 10 & 97.56 \\
+\hline
+\end{tabular}
+\caption{Accuracy for each client}
+\label{tab:client_accuracy}
+\end{table}
 
 
 \section{Conclusion}
 
 
-\bibliographystyle{plain}
-\bibliography{qml_project}
+
+
+
+\nocite{*}
+
+\clearpage
+\bibliographystyle{plain} 
+\bibliography{qml_project} 
 
 \end{document}

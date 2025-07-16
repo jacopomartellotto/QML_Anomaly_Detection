@@ -21,7 +21,6 @@ __pycache__/
 .vscode/
 # File di configurazione di PyCharm
 *.iml
-report.pdf
 presentation.pdf
 *.synctex.gz
 *.aux
@@ -32,3 +31,15 @@ presentation.pdf
 main.pdf
 beamer/unipi-eps-converted-to.pdf
 dataset/PS_20174392719_1491204439457_log.csv
+# File di configurazione di LaTeX
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.synctex.gz
+*.toc
+*.out
+*.nav
+*.snm
+*.aux
