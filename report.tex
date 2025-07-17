@@ -75,7 +75,73 @@ The results indicated that the dataset generated using SMOTE significantly outpe
 \end{figure}
 
 \section{Classic Machine Learning}
-
+In order to benchmark the performance of quantum machine learning models, we first implemented a series of classical machine learning algorithms. These algorithms serve as a baseline for comparison with quantum-enhanced approaches. The following classical models were trained and evaluated on the preprocessed dataset:
+\begin{itemize}
+	\item \textbf{Dummy}
+	\item \textbf{Decision Tree (DT)}
+	\item \textbf{AdaBoost}
+	\item \textbf{Multi-Layer Perceptron (MLP)}
+	\item \textbf{Logistic Regression (LR)}
+	\item \textbf{Random Forest (RF)}
+	\item \textbf{Support Vector Machine (SVM)}
+	\item \textbf{K-Nearest Neighbors (KNN)}
+\end{itemize}
+We expect that RF may be the most effective classical model for our dataset, given its ability to handle imbalanced data and capture complex interactions between features. In the following lines, we present our comparing results, which include the accuracy, precision, recall, and F1-score for each model. These metrics provide a comprehensive evaluation of the models' performance in detecting fraudulent transactions.
+\begin{figure}[H]
+	\centering
+	\includegraphics[height = 0.40\textheight]{img/fraud_detection_model_accuracy.png}
+	\caption{Model vs Accuracy - Random Forest (RF) achieved the highest accuracy, as expected.}
+\end{figure}
+\begin{figure}[H]
+	\centering
+	\includegraphics[height = 0.40\textheight]{img/fraud_f1_score.png}
+	\caption{Model vs F1-Score - Random Forest achieved the highest F1-Score, indicating a good balance between precision and recall.}
+\end{figure}
+\begin{figure}[H]
+	\centering
+	\includegraphics[height = 0.40\textheight]{img/PR_Curve.png}
+	\caption{PR-Curve}
+\end{figure}
+\begin{figure}[H]
+	\centering
+	\includegraphics[height = 0.40\textheight]{img/fraud_detection_false_values.png}
+	\caption{False Values - The chart shows the number of false positives and false negatives for each model.}
+\end{figure}
+We obtain the following results for each classical model:
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|c|c|c|c|c|}
+		\hline
+		Model & $\alpha$ optimized for & Accuracy (\%) & Precision (\%) & Recall (\%) & F1-Score (\%) \\
+		\hline
+		Dummy & – & 73.6 & 54.1 & 73.5 & 62.3 \\
+		\hline
+		Decision Tree & Accuracy & 91.4 & 91.3 & 91.4 & 91.3 \\
+		Decision Tree & F1-Score & 91.9 & 91.9 & 91.9 & 91.9 \\
+		\hline
+		AdaBoost & Accuracy & 92.2 & 92.1 & 92.2 & 92.1 \\
+		AdaBoost & F1-Score & 92.4 & 92.3 & 92.4 & 92.4 \\
+		\hline
+		MLP & Accuracy & 89.9 & 89.7 & 89.9 & 89.5 \\
+		MLP & F1-Score & 90.3 & 90.2 & 90.3 & 89.9 \\
+		\hline
+		Logistic Regression & Accuracy & 88.2 & 88.2 & 88.2 & 87.6 \\
+		Logistic Regression & F1-Score & 88.4 & 88.4 & 88.4 & 87.8 \\
+		\hline
+		Random Forest & Accuracy & 93.0 & 92.9 & 93.0 & 92.9 \\
+		Random Forest & F1-Score & 93.2 & 93.2 & 93.2 & 93.1 \\
+		\hline
+		SVM & Accuracy & 86.2 & 85.8 & 86.2 & 85.6 \\
+		SVM & F1-Score & 86.3 & 85.9 & 86.3 & 85.9 \\
+		\hline
+		KNN & Accuracy & 85.1 & 84.6 & 85.2 & 84.6 \\
+		KNN & F1-Score & 84.9 & 85.5 & 84.9 & 84.6 \\
+		\hline
+	\end{tabular}
+	\caption{Performance metrics for each model with hyperparameter $\alpha$ optimized separately for Accuracy and F1-Score.}
+\end{table}
+\noindent From the analysis of the results, we can draw the following conclusion: Randoma Forest performed the best overall, achieving the highest accuracy and F1-score. This is consistent with our expectations, as RF is known for its robustness in handling imbalanced datasets and capturing complex feature interactions. The Decision Tree and AdaBoost models also performed well, particularly when optimizing for F1-score. However, they did not surpass the performance of Random Forest. The other models, while still effective, showed lower performance metrics compared to RF, indicating that they may not be as suitable for this specific fraud detection task.\\
+However, AdaBoost and Decision Tree models are also great choices for fraud detection since they have less false-negatives than Random Forest, which is a crucial aspect in fraud detection, where missing a fraudulent transaction can have significant consequences.\\
 
 
 \section{Quantum Machine Learning}
