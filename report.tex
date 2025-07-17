@@ -45,7 +45,7 @@ By systematically comparing these approaches across a benchmarked fraud detectio
 \section{About Dataset}
 For our experiments, we utilize the Credit Card Fraud Detection dataset, which is publicly available on Kaggle. It contains 20k+ transactions and it's highly imbalanced. The dataset is made up of 114 columuns. Obviously, the last one \texttt{targets} is the target column, which indicates whether a transaction is fraudulent (1) or not (0). The dataset has been preprocessed to remove any personally identifiable information, ensuring that it can be used for research purposes without compromising privacy.\\
 Before Preprocessing, let's analyze the dataset. In order to evaluate how features are correlated each other, we can use the correlation matrix. The correlation matrix is a table that shows the correlation coefficients between many variables. Each cell in the table displays the correlation between two variables. The values range from -1 to 1. The heatmap of the correlation matrix can help us visualize these relationships more clearly. In the figure below, we present the correlation heatmap of the most relevant 30 features. 
-\begin{figure}[h!]
+\begin{figure}[H]
 	\centering
 	\includegraphics[height = 0.6\textheight]{img/correlation_heatmap_top_30_features.png}
 	\caption{Correlation heatmap of the top 30 features in the Credit Card Fraud Detection dataset. Darker colors indicate stronger correlations between features, while lighter colors indicate weaker correlations. This visualization helps identify potential relationships and interactions between variables that may be relevant for fraud detection.}
@@ -89,22 +89,22 @@ In order to benchmark the performance of quantum machine learning models, we fir
 We expect that RF may be the most effective classical model for our dataset, given its ability to handle imbalanced data and capture complex interactions between features. In the following lines, we present our comparing results, which include the accuracy, precision, recall, and F1-score for each model. These metrics provide a comprehensive evaluation of the models' performance in detecting fraudulent transactions.
 \begin{figure}[H]
 	\centering
-	\includegraphics[height = 0.40\textheight]{img/fraud_detection_model_accuracy.png}
+	\includegraphics[height = 0.37\textheight]{img/fraud_detection_model_accuracy.png}
 	\caption{Model vs Accuracy - Random Forest (RF) achieved the highest accuracy, as expected.}
 \end{figure}
 \begin{figure}[H]
 	\centering
-	\includegraphics[height = 0.40\textheight]{img/fraud_f1_score.png}
+	\includegraphics[height = 0.37\textheight]{img/fraud_f1_score.png}
 	\caption{Model vs F1-Score - Random Forest achieved the highest F1-Score, indicating a good balance between precision and recall.}
 \end{figure}
 \begin{figure}[H]
 	\centering
-	\includegraphics[height = 0.40\textheight]{img/PR_Curve.png}
+	\includegraphics[height = 0.37\textheight]{img/PR_Curve.png}
 	\caption{PR-Curve}
 \end{figure}
 \begin{figure}[H]
 	\centering
-	\includegraphics[height = 0.40\textheight]{img/fraud_detection_false_values.png}
+	\includegraphics[height = 0.37\textheight]{img/fraud_detection_false_values.png}
 	\caption{False Values - The chart shows the number of false positives and false negatives for each model.}
 \end{figure}
 We obtain the following results for each classical model:
