@@ -467,7 +467,7 @@ The following variables define the core configuration of the federated learning 
 The function \texttt{shamir\_split(secret, n, k, prime)} is used to split model weight into $n$ distinct shares using \textbf{Shamir’s Secret Sharing} scheme. It first generates a random polynomial of degree $k-1$ with the secret as the constant term, and evaluates it at $n$ different $x$-coordinates. Each share corresponds to a unique point $(x, y)$ on this polynomial. The shares can be safely distributed to different clients or nodes. Only when at least $k$ shares are combined can the original secret be reconstructed, ensuring threshold-based access control.\\
 \begin{figure}[h!]
 	\centering
-	\includegraphics[height = 0.30\textheight]{img/QFL_code/SSS.png}
+	\includegraphics[height = 0.25\textheight]{img/QFL_code/SSS.png}
 	\caption{Shamir's Secret Sharing Example}
 \end{figure}
 
