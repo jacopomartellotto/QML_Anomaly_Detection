@@ -22,7 +22,7 @@
 \affil[1]{\small\texttt{j.martellotto@studenti.unipi.it}}
 \date{}
 
-\author[2]{Federico Morano}
+\author[2]{Federico Gabriel Morano}
 \affil[2]{\small\texttt{f.morano1@studenti.unipi.it}}
 \date{} 
 
@@ -43,7 +43,7 @@ For the federated learning scenario, our architecture emphasizes data privacy an
 By systematically comparing these approaches across a benchmarked fraud detection task, the goal of this project is to determine which paradigm—classical, quantum, or hybrid—offers the best trade-off between accuracy, privacy, and computational efficiency in anomaly detection.
 
 \section{About Dataset}
-For our experiments, we utilize the Credit Card Fraud Detection dataset, which is publicly available on Kaggle. It contains 20k+ transactions and it's highly imbalanced. The dataset is made up of 114 columuns. Obviously, the last one \texttt{targets} is the target column, which indicates whether a transaction is fraudulent (1) or not (0). The dataset has been preprocessed to remove any personally identifiable information, ensuring that it can be used for research purposes without compromising privacy.\\
+For our experiments, we utilize the Credit Card Fraud Detection dataset, which is publicly available on Kaggle\footnote{https://www.kaggle.com/datasets/volodymyrgavrysh/fraud-detection-bank-dataset-20k-records-binary}. It contains 20k+ transactions and it's highly imbalanced. The dataset is made up of 113 columns. Obviously, the last one \texttt{targets} is the target column, which indicates whether a transaction is fraudulent (1) or not (0). The dataset has been preprocessed to remove any personally identifiable information, ensuring that it can be used for research purposes without compromising privacy.\\
 Before Preprocessing, let's analyze the dataset. In order to evaluate how features are correlated each other, we can use the correlation matrix. The correlation matrix is a table that shows the correlation coefficients between many variables. Each cell in the table displays the correlation between two variables. The values range from -1 to 1. The heatmap of the correlation matrix can help us visualize these relationships more clearly. In the figure below, we present the correlation heatmap of the most relevant 30 features. 
 \begin{figure}[H]
 	\centering
@@ -140,7 +140,7 @@ We obtain the following results for each classical model:
 	\end{tabular}
 	\caption{Performance metrics for each model with hyperparameter $\alpha$ optimized separately for Accuracy and F1-Score.}
 \end{table}
-\noindent From the analysis of the results, we can draw the following conclusion: Randoma Forest performed the best overall, achieving the highest accuracy and F1-score. This is consistent with our expectations, as RF is known for its robustness in handling imbalanced datasets and capturing complex feature interactions. The Decision Tree and AdaBoost models also performed well, particularly when optimizing for F1-score. However, they did not surpass the performance of Random Forest. The other models, while still effective, showed lower performance metrics compared to RF, indicating that they may not be as suitable for this specific fraud detection task.\\
+\noindent From the analysis of the results, we can draw the following conclusion: Random Forest performed the best overall, achieving the highest accuracy and F1-score. This is consistent with our expectations, as RF is known for its robustness in handling imbalanced datasets and capturing complex feature interactions. The Decision Tree and AdaBoost models also performed well, particularly when optimizing for F1-score. However, they did not surpass the performance of Random Forest. The other models, while still effective, showed lower performance metrics compared to RF, indicating that they may not be as suitable for this specific fraud detection task.\\
 However, AdaBoost and Decision Tree models are also great choices for fraud detection since they have less false-negatives than Random Forest, which is a crucial aspect in fraud detection, where missing a fraudulent transaction can have significant consequences.\\
 
 
@@ -160,7 +160,7 @@ To implement this part of the project we use the following libraries:
 \end{itemize}
 
 \subsubsection{Preparation of the dataset}
-The dataset used for QNNs is the one described in Section 2. After its preprocessing with the SMOTE function to mitigate the class imbalance problem, we use the\texttt{MinMaxScaler} function from \texttt{scikit-learn} to the entire dataset to normalize all the features. This ensures that each feature contributes equally to the model's performance and prevents those with larger numerical ranges from dominating the learning process. 
+The dataset used for QNNs is the one described in Section 2. After its preprocessing with the SMOTE function to mitigate the class imbalance problem, we use the \texttt{MinMaxScaler} function from \texttt{scikit-learn} to the entire dataset to normalize all the features. This ensures that each feature contributes equally to the model's performance and prevents those with larger numerical ranges from dominating the learning process. 
 We then partition the dataset into two distinct subsets using the \texttt{train\_test\_split} function from \texttt{sklearn.model\_selection}. The first one is the training set and comprises the 80\% of the total dataset. During model training, a portion of these data will be used for the validation set as indicated in the training function. The second one is the test set and includes the remaining part of the dataset. \\
 Following this process, the training set contained 24048 samples with 113 features. The class distribution within the training target was 12073 for class 0 (non-fraudulent) and 11975 for class 1 (fraudulent).
 
@@ -175,7 +175,7 @@ We employ the Angle Embedding feature map that maps each input feature to a rota
 
 \noindent \textbf{Ansatz}\\
 Following data encoding, a parameterized quantum circuit, known as ansatz, is applied. The ansatz is composed of a sequence of quantum gates with tunable parameters (`weights`), allowing the circuit to explore different quantum states and learn from the data. We define two distinct ansatz architectures for this project: \texttt{custom\_layer} and \texttt{custom\_layer\_long}. 
-Both of them belong to the family of hardware-efficient ansatz, that consists of an alternating-layered architecture composed of single-qubit gates followed by a cascade of entangling gates. The main advantage of this choice is its versatility, that allows the circuit to encode increasingly complex correlations and effectively explore the parameter space during optimization. To implement it we use three quantum gates:
+Both of them belong to the family of \texttt{Hardware-Efficient Ansatz}, that consists of an alternating-layered architecture composed of single-qubit gates followed by a cascade of entangling gates. The main advantage of this choice is its versatility, that allows the circuit to encode increasingly complex correlations and effectively explore the parameter space during optimization. To implement it we use three quantum gates:
 \begin{itemize}
     \item RY: single-qubit rotation gate that performs a rotation of the qubit state around the Y-axis of the Bloch sphere by an angle $\theta$, that is the trainable parameter;
     \item RZ: single-qubit rotation gate analogous to RY but on Z-axis;
@@ -225,15 +225,15 @@ The hybrid model consists of the following components:
     $$ \operatorname{Softmax}(\vec{z})_i = \frac{e^{z_i}}{\sum_{j=1}^{K} e^{z_j}} $$ where $\vec{z}$ is the input vector to the softmax function and $K$ is the number of classes (here $K=2$).
 \end{itemize}
 
-For \textbf{model compilation}, the Adam (Adaptive Moment Estimation) optimizer was selected with a specific learning rate of 0.001. The loss function chosen for this binary classification task is sparse categorical cross-entropy, which is suitable for integer-encoded target labels. The primary validation metric used to monitor performance during training was accuracy. \\
+\noindent For \textbf{model compilation}, the Adam (Adaptive Moment Estimation) optimizer was selected with a specific learning rate of 0.001. The loss function chosen for this binary classification task is sparse categorical cross-entropy, which is suitable for integer-encoded target labels. The primary validation metric used to monitor performance during training was accuracy. \\
 
-The \textbf{Adam} optimizer is a stochastic gradient descent method that computes an exponentially decaying average of past gradients ($m_t$, the first moment) and an exponentially decaying average of past squared gradients ($v_t$, the second moment). These moving averages are then used to update the parameters $\theta_t$ according to the following learning rule: 
+\noindent The \textbf{Adam} optimizer is a stochastic gradient descent method that computes an exponentially decaying average of past gradients ($m_t$, the first moment) and an exponentially decaying average of past squared gradients ($v_t$, the second moment). These moving averages are then used to update the parameters $\theta_t$ according to the following learning rule: 
 $$\theta_t = \theta_{t-1} - \eta \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$$
 where $\eta$ is the learning rate, $\hat{m}_t$ and $\hat{v}_t$ are the first and second bias-corrected moment, $\sqrt{\hat{v}_t}$ denotes the element-wise square root and $\epsilon$ is a small constant used to prevent division by zero. \\
 We notice that Adam algorithm uses the bias-corrected moment in the learning rule. Given that the two moments start from zero, this correction avoids underestimating the parameters in the first iterations.\\
 We chose Adam method because it is straightforward to implement, is computationally efficient, has little memory requirements. Moreover the moment-based structure and the bias correction help the optimizer perform well during the initial stages of training and to accelerate convergence in the right direction. \\
 
-The \textbf{Sparse Categorical Cross-Entropy} loss function is a widely used loss function for classification problems. It is a variant of the categorical cross-entropy loss, designed for those cases where targets are integers rather than as one-hot encoded vectors. It is called "sparse" because instead of requiring an one-hot encoded vector to indicate the class it accepts a "sparse" integer representing only the class index. For this reason it is a more memory-efficient approach then categorical cross-entropy loss. \\
+\noindent The \textbf{Sparse Categorical Cross-Entropy} loss function is a widely used loss function for classification problems. It is a variant of the categorical cross-entropy loss, designed for those cases where targets are integers rather than as one-hot encoded vectors. It is called "sparse" because instead of requiring an one-hot encoded vector to indicate the class it accepts a "sparse" integer representing only the class index. For this reason it is a more memory-efficient approach then categorical cross-entropy loss. \\
 Let $N$ be the number of samples in a batch, and $K = 2$ be the number of classes.
 For a single sample $i$:
 \begin{itemize}
@@ -244,9 +244,9 @@ The Sparse Categorical Cross-entropy loss for a single sample $i$ is $L_i = - y_
 For a batch of $N$ samples, the total loss is the average over all samples:
 $$L = - \frac{1}{N} \sum_{i=1}^{N} y_i \log(\hat{p}_{i, y_i})$$
 
-The model was trained using the \texttt{fit} function over 10 epochs. A validation split of 0.2 was applied, meaning that 20\% of the training data was set aside for validation. The batch size for training was set to 25 samples per gradient update, and the training data was shuffled before each epoch to ensure diverse batch presentation.
+\noindent The model was trained using the \texttt{fit} function over 10 epochs. A validation split of 0.2 was applied, meaning that 20\% of the training data was set aside for validation. The batch size for training was set to 25 samples per gradient update, and the training data was shuffled before each epoch to ensure diverse batch presentation.
 
-The training and validation loss and accuracy values across the 10 epochs are presented in Table \ref{tab:training_validation_metrics}.
+\noindent The training and validation loss and accuracy values across the 10 epochs are presented in Table \ref{tab:training_validation_metrics}.
 
 \begin{table}[H]
     \centering
@@ -270,15 +270,14 @@ The training and validation loss and accuracy values across the 10 epochs are pr
     \end{tabular}
 \end{table}
 
-After training, the model's performance was evaluated on the unseen test set. The confusion matrix provides the number of correct and incorrect predictions:
+\noindent After training, the model's performance was evaluated on the unseen test set. The confusion matrix provides the number of correct and incorrect predictions:
 \[
 \begin{pmatrix}
     2943 & 14 \\
     15 & 3040
 \end{pmatrix}
 \]
-In this matrix, 2943 represents true negatives (correctly identified as non-fraudulent transactions) and 3040 represents true positives (correctly identified as fraudulent transactions). The false positive (non-fraudulent transactions incorrectly classified as fraud) are 14, while 15 are false negatives (fraudulent transactions incorrectly classified as non-fraudulent).
-
+In this matrix, 2943 represents true negatives (correctly identified as non-fraudulent transactions) and 3040 represents true positives (correctly identified as fraudulent transactions). The false positive (non-fraudulent transactions incorrectly classified as fraud) are 14, while 15 are false negatives (fraudulent transactions incorrectly classified as non-fraudulent).\\
 The \textbf{classification report} further quantifies the model's performance across key metrics for both classes:
 \begin{verbatim}
               precision    recall  f1-score   support
@@ -390,7 +389,7 @@ In this case, 2945 are true negatives, 3037 are true positives, 12 are false pos
 weighted avg       1.00      1.00      1.00      6012
 \end{verbatim}
 
-The simplified hybrid model achieved an overall accuracy of 1.00, with precision, recall, and F1-scores consistently at 0.99 or 1.00 for both classes. \\
+\noindent The simplified hybrid model achieved an overall accuracy of 1.00, with precision, recall, and F1-scores consistently at 0.99 or 1.00 for both classes. \\
 
 \noindent \textbf{Conclusion of Impact Evaluation} \\
 Comparing the performance of the simplified classical model with the simplified hybrid quantum-classical model reveals the positive impact and usefulness of the quantum layer. While both models demonstrate remarkable performance on this fraud detection task, the hybrid model requires fewer epochs to converge, resulting in fewer false positives and false negatives than the classical model (12 FP, 18 FN for hybrid vs. 37 FP, 9 FN for classical). \\
@@ -406,7 +405,7 @@ The hybrid framework, by combining the strengths of classical processing with th
 	\includegraphics[height = 0.30\textheight]{img/FL_model.png}
 	\caption{A schematic overview of the Federated Learning (FL) architecture illustrates several users (clients), each working with their own private dataset to independently train local models. Instead of sharing raw data, clients send their model updates to a central server. The server combines these updates to enhance the global model, which is then redistributed to all clients for the next training round. This iterative process preserves data privacy and security by ensuring that users' raw data remains on their local devices.}
 \end{figure}
-Federated Learning (FL) has recently gained prominence due to growing concerns about data privacy and the limitations of cloud-based deep learning with large-scale datasets. This learning paradigm involves two main components: a central server and multiple client nodes. The central server maintains the global model and collects the locally trained parameters from client devices. It then aggregates these parameters to update the global model, which is subsequently shared back with all clients. Each client trains the received model using its own local data, which typically represents only a small subset of the overall dataset.
+\noindent Federated Learning (FL) has recently gained prominence due to growing concerns about data privacy and the limitations of cloud-based deep learning with large-scale datasets. This learning paradigm involves two main components: a central server and multiple client nodes. The central server maintains the global model and collects the locally trained parameters from client devices. It then aggregates these parameters to update the global model, which is subsequently shared back with all clients. Each client trains the received model using its own local data, which typically represents only a small subset of the overall dataset.
 In our proposed framework, the client nodes consist of quantum computers or quantum simulators that train circuit parameters using a hybrid quantum-classical approach. During each training round, a selected group of client nodes carries out local training. Afterward, the updated circuit parameters from all participating clients are sent to the central node, where they are aggregated to refine the global model.
 \begin{figure}[h!]
 	\centering
@@ -431,7 +430,7 @@ The implementation of the project relies on a combination of quantum computing l
 	\item \textbf{Shamir's Secret Sharing}
 	\item \textbf{Ethereum (via Web3)}: A smart contract is deployed to a local Ethereum test network (simulated using Ganache) to store and verify the integrity of model updates in a tamper-proof, decentralized manner.
 	\item \textbf{Quantum Key Distribution (QKD)}: Simulated QKD is used for secure key exchange between clients, allowing encrypted communication channels for transmitting model updates securely across the network.
-	\item \textbf{SMOTE (Synthetic Minority Oversampling Technique)}
+	\item \textbf{SMOTE}
 \end{itemize}
 
 
@@ -561,7 +560,7 @@ Each entry in the \texttt{client\_models} list represents a separate Keras model
 
 
 \subsubsection*{- Quantum Layer Structure}
-The structure used here is the same as that employed in the QNN. In particular, we use the custom 'long' layer previously described. To avoid redundancy, we refer the reader to the preceding section for a detailed explanation of the quantum layer structure and its implementation.
+The structure used here is the same as that employed in the QNN. In particular, we use the custom \texttt{custom\_layer\_long} previously described. To avoid redundancy, we refer the reader to the preceding section for a detailed explanation of the quantum layer structure and its implementation.
 
 
 \subsubsection*{- Local Quantum Model}
