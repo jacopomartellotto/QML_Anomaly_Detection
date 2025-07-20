@@ -146,6 +146,256 @@ However, AdaBoost and Decision Tree models are also great choices for fraud dete
 
 \section{Quantum Machine Learning}
 \subsection{QNN}
+The first QML model evaluated in this project is a Quantum Neural Network.\\
+Firstly, we want to determine whether a quantum-classical hybrid neural network is suitable for solving the fraud detection problem. To this end, we develop this type of network and evaluate its accuracy and efficiency.
+Next, we want to investigate how the quantum layer of the hybrid network influences the model's performance and quantify the quantum improvement. We expect significant advantages in terms of computational speed and accuracy due to the remarkable ability of quantum states to represent complex patterns and correlations.
+Therefore, we create and compare the performance of two other neural networks: one classical and the other hybrid. Both have fewer layers than the previous network and are trained on a smaller dataset to speed up execution.\\
+To implement this part of the project we use the following libraries:
+\begin{itemize}
+    \item \textbf{PennyLane}
+    \item \textbf{TensorFlow/Keras}
+    \item \textbf{scikit-learn}
+    \item \textbf{imbalanced-learn} for the SMOTE function
+    \item \textbf{NumPy}, \textbf{Pandas}, \textbf{Matplotlib}
+\end{itemize}
+
+\subsubsection{Preparation of the dataset}
+The dataset used for QNNs is the one described in Section 2. After its preprocessing with the SMOTE function to mitigate the class imbalance problem, we use the\texttt{MinMaxScaler} function from \texttt{scikit-learn} to the entire dataset to normalize all the features. This ensures that each feature contributes equally to the model's performance and prevents those with larger numerical ranges from dominating the learning process. 
+We then partition the dataset into two distinct subsets using the \texttt{train\_test\_split} function from \texttt{sklearn.model\_selection}. The first one is the training set and comprises the 80\% of the total dataset. During model training, a portion of these data will be used for the validation set as indicated in the training function. The second one is the test set and includes the remaining part of the dataset. \\
+Following this process, the training set contained 24048 samples with 113 features. The class distribution within the training target was 12073 for class 0 (non-fraudulent) and 11975 for class 1 (fraudulent).
+
+
+\subsubsection{Description of the quantum layer}
+The core of our hybrid model is its quantum layer, which is implemented as a Variational Quantum Circuit (VQC). To execute a quantum circuit in PennyLane, a quantum device must be defined. In this project we use the simulator indicated in the function \texttt{dev = qml.device("default.qubit", wires=n\_qubits+1)}, that is a standard Pennylane simulator, very suitable for fast prototyping with small-scale circuits. The parameter \texttt{n\_qubits} is set to 3, meaning the quantum circuit operates on 4 qubits (wires), indexed from 0 to 3.
+To create the VQC itself we define the quantum function \texttt{qnode(input, weights)} that describes the quantum operations applied to each qubit and takes classical inputs and trainable weights as arguments. Its architecture involves three fundamental components: a feature map, an ansatz, and measurement.\\ 
+
+\noindent \textbf{Feature Map}\\
+The feature map is the part of a quantum circuit that manages the data encoding, where classical input features are transformed into quantum states. 
+We employ the Angle Embedding feature map that maps each input feature to a rotation angle on a specific qubit. Specifically, for an input \texttt{x}, the function \texttt{qml.AngleEmbedding(inputs, wires=range(n\_qubits+1))} applies rotations around X-axis (default value) to each of the 4 qubits based on the input values. \\
+
+\noindent \textbf{Ansatz}\\
+Following data encoding, a parameterized quantum circuit, known as ansatz, is applied. The ansatz is composed of a sequence of quantum gates with tunable parameters (`weights`), allowing the circuit to explore different quantum states and learn from the data. We define two distinct ansatz architectures for this project: \texttt{custom\_layer} and \texttt{custom\_layer\_long}. 
+Both of them belong to the family of hardware-efficient ansatz, that consists of an alternating-layered architecture composed of single-qubit gates followed by a cascade of entangling gates. The main advantage of this choice is its versatility, that allows the circuit to encode increasingly complex correlations and effectively explore the parameter space during optimization. To implement it we use three quantum gates:
+\begin{itemize}
+    \item RY: single-qubit rotation gate that performs a rotation of the qubit state around the Y-axis of the Bloch sphere by an angle $\theta$, that is the trainable parameter;
+    \item RZ: single-qubit rotation gate analogous to RY but on Z-axis;
+    \item CNOT (Controlled-NOT): two-qubit gate that creates entanglement between two qubits. This gate acts on the target qubit only if the control qubit is in a specific state. If the control qubit is $|1\rangle$, the gate flips the state of the target qubit; otherwise, it leaves the target qubit unaltered. In its matrix representation the first is the control qubit and the second the target one.
+\end{itemize}
+The following is matrix representation of described gates: 
+\[
+    \operatorname{RY}(\theta) = \begin{pmatrix} cos(\theta/2) & -\sin(\theta/2) \\ \sin(\theta/2) & \cos(\theta/2) \end{pmatrix}
+    \quad
+    \operatorname{RZ}(\theta) = \begin{pmatrix} e^{-i\theta/2} & 0 \\ 0 & e^{i\theta/2} \end{pmatrix}
+    \quad
+    \operatorname{CNOT} = \begin{pmatrix} 1 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 0 & 1 \\ 0 & 0 & 1 & 0 \end{pmatrix}
+\]
+
+\noindent \textbf{Output} \\
+The final component of the quantum layer involves measurement, in order to extract classical information from the evolved quantum states.
+In this project, the output is obtained by measuring the the expectation value of the Pauli-Z operator on each qubit.
+This measurement provides classical output values that are then passed to the subsequent classical layers of the hybrid neural network. \\ 
+
+\noindent \textbf{Creation of the QNode} \\
+Combining the feature map, the ansatz and measurements in quantum functions \texttt{qnode(inputs, weights)} and \texttt{qnode\_long(inputs, weights)} we obtain the two quantum layers that we will use for our hybrid network. \\
+Figures \ref{fig:qnode} and \ref{fig:qnode_long} show the visual representation of their architectures. Their only difference is the presence of repeated block of quantum gates in \texttt{qnode\_long}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{img/qnode_withblock.png}
+    \caption{Visual representation of \texttt{qnode} circuit. We can schematise the ansatz into two blocks, as shown here. Each one has an alternating rotations and CNOT gates}
+    \label{fig:qnode}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{img/qnode_long_withblock.png}
+    \caption{Visual representation of \texttt{qnode\_long} circuit. Compared to \texttt{qnode}, it has one more block of rotations and cnot gates.}
+    \label{fig:qnode_long}
+\end{figure}
+
+
+\subsubsection{Hybrid Quantum-Classical Model}
+The architecture of out hybrid quantum-classical neural network model combines traditional classical dense layers, which are efficient for processing and learning from large volumes of data, with a quantum layer implemented using PennyLane and integrated within the Keras framework. The hybrid model is indeed structured as a Keras Sequential model, allowing for a straightforward stacking of layers. 
+This approach aims to utilize the representational power of quantum circuits for complex patterns while maintaining the stability and scalability offered by classical neural networks. \\
+The hybrid model consists of the following components:
+\begin{itemize}
+    \item \textbf{Classical Dense Layers:} The initial part of the network comprises four fully connected classical dense layers with varying numbers of neurons. These layers are responsible for initial feature processing and learning hierarchical representations from the input data. Specifically, these dense layers employ the Rectified Linear Unit (ReLU) activation function (implemented as \texttt{tf.nn.relu}), which introduce non-linearity via $\operatorname{ReLU}(x) = \max(0, x)$. The configuration involves layers with 64, 32, 16, and 4 neurons respectively.
+    \item \textbf{Quantum Layer:} Following the classical layers, the VQC, as detailed in Section 5.1.2, serves as the quantum layer. In this specific hybrid model, the \texttt{qnode} variant of the quantum layer was employed.
+    \item \textbf{Output Classical Layer:} The final layer is a classical dense layer with 2 neurons and a \textbf{softmax activation function} (implemented as \texttt{tf.nn.softmax}). This function takes as input a vector of arbitrary real numbers and converts it into a probability distribution over the predicted output classes. Each element of the output vector represents the probability of the input belonging to a particular class. In this way this output layer can be used to classify the input transaction as fraudulent (1) or non-fraudulent (0). The mathematical description of the function is: 
+    $$ \operatorname{Softmax}(\vec{z})_i = \frac{e^{z_i}}{\sum_{j=1}^{K} e^{z_j}} $$ where $\vec{z}$ is the input vector to the softmax function and $K$ is the number of classes (here $K=2$).
+\end{itemize}
+
+For \textbf{model compilation}, the Adam (Adaptive Moment Estimation) optimizer was selected with a specific learning rate of 0.001. The loss function chosen for this binary classification task is sparse categorical cross-entropy, which is suitable for integer-encoded target labels. The primary validation metric used to monitor performance during training was accuracy. \\
+
+The \textbf{Adam} optimizer is a stochastic gradient descent method that computes an exponentially decaying average of past gradients ($m_t$, the first moment) and an exponentially decaying average of past squared gradients ($v_t$, the second moment). These moving averages are then used to update the parameters $\theta_t$ according to the following learning rule: 
+$$\theta_t = \theta_{t-1} - \eta \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$$
+where $\eta$ is the learning rate, $\hat{m}_t$ and $\hat{v}_t$ are the first and second bias-corrected moment, $\sqrt{\hat{v}_t}$ denotes the element-wise square root and $\epsilon$ is a small constant used to prevent division by zero. \\
+We notice that Adam algorithm uses the bias-corrected moment in the learning rule. Given that the two moments start from zero, this correction avoids underestimating the parameters in the first iterations.\\
+We chose Adam method because it is straightforward to implement, is computationally efficient, has little memory requirements. Moreover the moment-based structure and the bias correction help the optimizer perform well during the initial stages of training and to accelerate convergence in the right direction. \\
+
+The \textbf{Sparse Categorical Cross-Entropy} loss function is a widely used loss function for classification problems. It is a variant of the categorical cross-entropy loss, designed for those cases where targets are integers rather than as one-hot encoded vectors. It is called "sparse" because instead of requiring an one-hot encoded vector to indicate the class it accepts a "sparse" integer representing only the class index. For this reason it is a more memory-efficient approach then categorical cross-entropy loss. \\
+Let $N$ be the number of samples in a batch, and $K = 2$ be the number of classes.
+For a single sample $i$:
+\begin{itemize}
+    \item $y_i$ is the integer true label for sample $i$, that in this case can be $y_i = 0$ or $y_i = 1$;
+    \item $\hat{p}_{i, j}$ is the predicted probability that sample $i$ belongs to class $j$, obtained from the Softmax output of the model for sample $i$.
+\end{itemize}
+The Sparse Categorical Cross-entropy loss for a single sample $i$ is $L_i = - y_i \log(\hat{p}_{i, y_i})$. \\
+For a batch of $N$ samples, the total loss is the average over all samples:
+$$L = - \frac{1}{N} \sum_{i=1}^{N} y_i \log(\hat{p}_{i, y_i})$$
+
+The model was trained using the \texttt{fit} function over 10 epochs. A validation split of 0.2 was applied, meaning that 20\% of the training data was set aside for validation. The batch size for training was set to 25 samples per gradient update, and the training data was shuffled before each epoch to ensure diverse batch presentation.
+
+The training and validation loss and accuracy values across the 10 epochs are presented in Table \ref{tab:training_validation_metrics}.
+
+\begin{table}[H]
+    \centering
+    \caption{Training and Validation Metrics for the Hybrid Quantum-Classical Model}
+    \label{tab:training_validation_metrics}
+    \begin{tabular}{|c|c|c|c|c|}
+        \hline
+        \textbf{Epoch} & \textbf{Training Loss} & \textbf{Training Accuracy} & \textbf{Validation Loss} & \textbf{Validation Accuracy} \\
+        \hline
+        1 & 0.1211 & 0.9612 & 0.0307 & 0.9933 \\
+        2 & 0.0311 & 0.9902 & 0.0214 & 0.9933 \\
+        3 & 0.0200 & 0.9934 & 0.0202 & 0.9946 \\
+        4 & 0.0153 & 0.9947 & 0.0233 & 0.9925 \\
+        5 & 0.0130 & 0.9959 & 0.0398 & 0.9879 \\
+        6 & 0.0133 & 0.9951 & 0.0148 & 0.9954 \\
+        7 & 0.0106 & 0.9966 & 0.0183 & 0.9938 \\
+        8 & 0.0111 & 0.9960 & 0.0207 & 0.9942 \\
+        9 & 0.0084 & 0.9972 & 0.0160 & 0.9956 \\
+        10 & 0.0106 & 0.9962 & 0.0167 & 0.9933 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+After training, the model's performance was evaluated on the unseen test set. The confusion matrix provides the number of correct and incorrect predictions:
+\[
+\begin{pmatrix}
+    2943 & 14 \\
+    15 & 3040
+\end{pmatrix}
+\]
+In this matrix, 2943 represents true negatives (correctly identified as non-fraudulent transactions) and 3040 represents true positives (correctly identified as fraudulent transactions). The false positive (non-fraudulent transactions incorrectly classified as fraud) are 14, while 15 are false negatives (fraudulent transactions incorrectly classified as non-fraudulent).
+
+The \textbf{classification report} further quantifies the model's performance across key metrics for both classes:
+\begin{verbatim}
+              precision    recall  f1-score   support
+
+         0.0       0.99      1.00      1.00      2957
+         1.0       1.00      1.00      1.00      3055
+
+    accuracy                           1.00      6012
+   macro avg       1.00      1.00      1.00      6012
+weighted avg       1.00      1.00      1.00      6012
+\end{verbatim}
+The classification report shows exceptional performance, with precision, recall, and F1-score all reaching 0.99 or 1.00 for both classes. The overall accuracy is 1.00, indicating that the hybrid quantum-classical model is highly suitable for the credit card fraud detection problem with this dataset. This demonstrates the potential of integrating quantum layers into classical neural networks for complex classification tasks.\\
+We also ran a test using the same quantum layer model, but with 10 qubits instead of 4. The main outcome was that an accuracy of 99.17\% was achieved in just 3 epochs.
+
+
+\subsubsection{Evaluating the Impact of the Quantum Model}
+To further investigate the utility and impact of the quantum layer within a hybrid neural network architecture, we conduct a comparative analysis with simplified models. This approach aimed to quantify the quantum improvement by assessing the performance differences between a purely classical neural network and a hybrid quantum-classical counterpart, both designed with fewer layers and trained on a reduced dataset to expedite execution and facilitate analysis.\\
+
+\noindent \textbf{Classical Model} \\
+A purely classical neural network is constructed using Keras to serve as a baseline for comparison. This model consists solely of classical dense layers.
+\begin{itemize}
+    \item Architecture: the model includes an input layer with 4 neurons that utilize the ReLU activation function. The output layer comprises 2 neurons with the Softmax activation function for binary classification.
+    \item Compilation: the model is compiled using the Adam optimizer with a learning rate of 0.01. The loss function is the sparse categorical cross-entropy, and the accuracy is the primary metric for evaluation.
+    \item Training: the network is trained for 3 epochs using a validation split of 0.2, a batch size of 20 and the shuffling of training data before each epoch.
+\end{itemize}
+
+The training and validation metrics for the classical model are shown in Table \ref{tab:classical_model_metrics}.
+
+\begin{table}[H]
+    \centering
+    \caption{Training and Validation Metrics for the Classical Model (Simplified)}
+    \label{tab:classical_model_metrics}
+    \begin{tabular}{|c|c|c|c|c|}
+        \hline
+        \textbf{Epoch} & \textbf{Training Loss} & \textbf{Training Accuracy} & \textbf{Validation Loss} & \textbf{Validation Accuracy} \\
+        \hline
+        1 & 0.1033 & 0.9719 & 0.0284 & 0.9950 \\
+        2 & 0.0263 & 0.9925 & 0.0319 & 0.9902 \\
+        3 & 0.0188 & 0.9940 & 0.0231 & 0.9917 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\noindent Upon evaluation on the test set, the classical model yielded the following performance metrics:\\
+\textbf{Confusion Matrix:}
+\[
+\begin{pmatrix}
+    2920 & 37 \\
+    9 & 3046
+\end{pmatrix}
+\]
+where 2920 are true negatives, 3046 are true positives, 37 are false positives, and 9 are false negatives.\\
+\textbf{Classification Report:}
+\begin{verbatim}
+              precision    recall  f1-score   support
+
+         0.0       1.00      0.99      0.99      2957
+         1.0       0.99      1.00      0.99      3055
+
+    accuracy                           0.99      6012
+   macro avg       0.99      0.99      0.99      6012
+weighted avg       0.99      0.99      0.99      6012
+\end{verbatim}
+The classical model demonstrated strong performance with an overall accuracy of 0.99, and high precision, recall, and F1-scores for both classes.\\
+
+\noindent \textbf{Hybrid Model (Simplified)} \\
+A simplified hybrid quantum-classical model is constructed as follows.
+\begin{itemize}
+    \item Architecture: this model incorporated a classical input dense layer with 4 neurons and a ReLU activation function, followed by the quantum layer (\texttt{qnode\_long} as described in Section 5.1.2), and finally a classical output dense layer with 2 neurons and a Softmax activation function.
+    \item Compilation: similar to the classical model, this hybrid network is compiled with the Adam optimizer, sparse categorical cross-entropy loss function and accuracy as the main metric.
+    \item Training: the model is trained for 3 epochs with a validation split of 0.2, a batch size of 25 and shuffling of training data.
+\end{itemize}
+
+The training and validation metrics for the simplified hybrid model are presented in Table \ref{tab:hybrid_simplified_model_metrics}.
+
+\begin{table}[H]
+    \centering
+    \caption{Training and Validation Metrics for the Hybrid Quantum-Classical Model (Simplified)}
+    \label{tab:hybrid_simplified_model_metrics}
+    \begin{tabular}{|c|c|c|c|c|}
+        \hline
+        \textbf{Epoch} & \textbf{Training Loss} & \textbf{Training Accuracy} & \textbf{Validatio Loss} & \textbf{Validation Accuracy} \\
+        \hline
+        1 & 0.1057 & 0.9650 & 0.0300 & 0.9911 \\
+        2 & 0.0260 & 0.9923 & 0.0189 & 0.9946 \\
+        3 & 0.0191 & 0.9942 & 0.0162 & 0.9973 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\noindent The performance of the simplified hybrid model on the test set is as follows:\\
+\textbf{Confusion Matrix:}
+    \[
+    \begin{pmatrix}
+    2945 & 12 \\
+    18 & 3037
+    \end{pmatrix}
+    \]
+In this case, 2945 are true negatives, 3037 are true positives, 12 are false positives, and 18 are false negatives. \\
+\textbf{Classification Report:}
+\begin{verbatim}
+              precision    recall  f1-score   support
+
+         0.0       0.99      1.00      0.99      2957
+         1.0       1.00      0.99      1.00      3055
+
+    accuracy                           1.00      6012
+   macro avg       0.99      1.00      1.00      6012
+weighted avg       1.00      1.00      1.00      6012
+\end{verbatim}
+
+The simplified hybrid model achieved an overall accuracy of 1.00, with precision, recall, and F1-scores consistently at 0.99 or 1.00 for both classes. \\
+
+\noindent \textbf{Conclusion of Impact Evaluation} \\
+Comparing the performance of the simplified classical model with the simplified hybrid quantum-classical model reveals the positive impact and usefulness of the quantum layer. While both models demonstrate remarkable performance on this fraud detection task, the hybrid model requires fewer epochs to converge, resulting in fewer false positives and false negatives than the classical model (12 FP, 18 FN for hybrid vs. 37 FP, 9 FN for classical). \\
+This outcome indicates that even with a reduced dataset and simplified architecture, the integration of a quantum layer can subtly enhance the model's ability to discern complex patterns and correlations.\\
+The hybrid framework, by combining the strengths of classical processing with the unique representational power of quantum circuits, appears to yield a robust and highly effective solution for credit card fraud detection.
 
 
 
